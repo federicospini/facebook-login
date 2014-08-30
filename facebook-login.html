@@ -14,7 +14,7 @@ can be used for API calls.
 @status alpha
 @homepage http://davidwittenbrink.github.io/facebook-login
 -->
-<polymer-element name="facebook-login" attributes="appID cookie version scopes buttonText graphURL graphResponse autoAPICall graphParams">
+<polymer-element name="facebook-login" attributes="appID cookie version scopes buttonText size autoLogoutLink showFaces maxRows graphURL graphResponse autoAPICall graphParams">
 
   <template>
     <style>
@@ -23,9 +23,13 @@ can be used for API calls.
       }
     </style>
     <div id='fb-login-container'>
-        <fb:login-button scope="{{FB_APP_SCOPES}}" onlogin="FB.customCheckLoginState();" data-auto-logout-link="true">
-        {{ buttonText }}
-        </fb:login-button>
+        <fb:login-button 
+          scope="{{FB_APP_SCOPES}}" 
+          onlogin="FB.customCheckLoginState();" 
+          data-size="{{ size }}"
+          data-auto-logout-link="{{ autoLogoutLink }}"
+          data-show-faces="{{ showFaces }}"
+          data-max-rows="{{ maxRows }}">{{ buttonText }}</fb:login-button>
     </div>
   </template>
 
@@ -34,7 +38,7 @@ can be used for API calls.
 
     (function(){
 
-      function statusChangeCallback(response) {
+      function statusChangeCallback (response) {
 
         if (response.status === 'connected') {
           // Logged into app and Facebook.
@@ -46,6 +50,7 @@ can be used for API calls.
           // The person is not logged into Facebook, so we're not sure if
           // they are logged into this app or not.
           console.log('User not logged into Facebook');
+          handler.fire('facebook-user-not-logged', {response: response});
         }
       }
 
@@ -56,12 +61,14 @@ can be used for API calls.
       var handler;
 
       Polymer('facebook-login', {
+
         /**
          * The `appID` attribute is the app ID of your Facebook app. Create one at https://developers.facebook.com/apps/
          * 
          * @attribute appID
          * @type string
          */
+        
         appID: '',
 
         /**
@@ -71,15 +78,19 @@ can be used for API calls.
          * @type bool
          * default true
          */
+        
         cookie: true,
+
         /**
          * The `version` attribute specifies which FB API version should be used. Example 'v2.0'.
          * 
          * @attribute version
          * @type string
-         * @default 'v2.0'
+         * @default 'v2.1'
          */
-        version: 'v2.0',
+        
+        version: 'v2.1',
+
         /**
          * The scopes that you want access to.
          * (see https://developers.facebook.com/docs/facebook-login/permissions/v2.0). Should be space delimited.
@@ -88,7 +99,9 @@ can be used for API calls.
          * @type string
          * @default 'public_profile'
          */
+        
         scopes: 'public_profile',
+
         /**
          * The text you want to display inside of the button.
          * 
@@ -97,7 +110,53 @@ can be used for API calls.
          * @type string
          * @default ''
          */
+        
         buttonText: '',
+
+        /**
+         * One of [small, medium, large, xlarge]
+         * 
+         *
+         * @attribute size
+         * @type enum
+         * @default true
+         */
+        
+        size: 'large',
+
+        /**
+         * If it has to show 'Log out' button on not.
+         * 
+         *
+         * @attribute autoLogoutLink
+         * @type boolean
+         * @default true
+         */
+        
+        autoLogoutLink: true,
+
+        /**
+         * Determines whether a Facepile of logged-in friends is shown below the button. 
+         * When this is enabled, a logged-in user will only see the Facepile, and no login or logout button.
+         * 
+         *
+         * @attribute showFaces
+         * @type Boolean
+         * @default false
+         */
+        
+        showFaces: false,
+
+        /**
+         * The maximum number of rows of profile photos in the Facepile when show_faces is enabled. 
+         * 
+         *
+         * @attribute maxRows
+         * @type Number
+         * @default 1
+         */
+        
+        maxRows: 1,
 
         /**
          * The Graph API URL you want to access.
@@ -107,6 +166,7 @@ can be used for API calls.
          * @type string
          * @default ''
          */
+        
         graphURL: '',
 
         /**
@@ -117,6 +177,7 @@ can be used for API calls.
          * @type Object
          * @default null
          */
+        
         graphResponse: null,
 
         /**
@@ -127,6 +188,7 @@ can be used for API calls.
          * @type Object
          * @default {}
          */
+        
         graphParams: {},
 
         /**
@@ -137,6 +199,7 @@ can be used for API calls.
          * @type string
          * @default 'get'
          */
+        
         graphMethod: 'get',
 
         /**
@@ -146,6 +209,7 @@ can be used for API calls.
          * @type boolean
          * @default false
          */
+        
         autoAPICall: false,
 
         /**
@@ -153,6 +217,7 @@ can be used for API calls.
         * 
         * @method go
         */
+        
         go: function(params, method) {
           
           if(!this.graphURL)
